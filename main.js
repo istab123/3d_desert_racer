@@ -1,5 +1,5 @@
 import * as THREE from 'https://unpkg.com/three@0.157.0/build/three.module.js';
-import { Sky } from 'https://unpkg.com/three@0.157.0/examples/jsm/objects/Sky.js';
+import { Sky } from 'https://unpkg.com/three@0.157.0/examples/jsm/objects/Sky.js?module';
 
 // --- Renderer & Scene ---
 const canvas = document.getElementById('game');
