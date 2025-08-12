@@ -1,6 +1,8 @@
 # 3d_desert_racer
 
-Open index.html in a browser to play the Tiny Desert Racer game. Styles are in style.css and logic in main.js.
+A tiny demo of a 3D desert racing game built with [Three.js](https://threejs.org/). Open `index.html` in a modern browser to drive a miniature car across endless sand dunes.
 
-The game now features a dynamic sky with tone-mapped lighting for a more realistic look.
-
+**Controls**
+- `W` / `S` – accelerate / brake
+- `A` / `D` – steer left / right
+- Arrow keys also work.
