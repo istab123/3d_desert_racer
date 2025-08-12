@@ -1,4 +1,5 @@
 import * as THREE from 'https://unpkg.com/three@0.157.0/build/three.module.js';
+import { Sky } from 'https://unpkg.com/three@0.157.0/examples/jsm/objects/Sky.js';
 
 // --- Renderer & Scene ---
 const canvas = document.getElementById('game');
@@ -6,10 +7,35 @@ const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
 renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
 renderer.setSize(innerWidth, innerHeight);
 renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 0.9;
 
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xf8e7c9);
 scene.fog = new THREE.FogExp2(0xf4dfb5, 0.0085);
+
+const sky = new Sky();
+sky.scale.setScalar(45000);
+scene.add(sky);
+
+const skyUniforms = sky.material.uniforms;
+skyUniforms['turbidity'].value = 10;
+skyUniforms['rayleigh'].value = 2;
+skyUniforms['mieCoefficient'].value = 0.005;
+skyUniforms['mieDirectionalG'].value = 0.8;
+
+const sunPos = new THREE.Vector3();
+const phi = THREE.MathUtils.degToRad(88);
+const theta = THREE.MathUtils.degToRad(-120);
+sunPos.setFromSphericalCoords(1, phi, theta);
+skyUniforms['sunPosition'].value.copy(sunPos);
+
+const pmrem = new THREE.PMREMGenerator(renderer);
+const envTex = pmrem.fromScene(sky).texture;
+scene.environment = envTex;
+scene.background = envTex;
+pmrem.dispose();
 
 // Lighting
 const hemi = new THREE.HemisphereLight(0xfff4cf, 0x997a45, 0.75);
@@ -53,7 +79,7 @@ function makeSandTexture() {
   return tex;
 }
 const sandTex = makeSandTexture();
-const groundMat = new THREE.MeshStandardMaterial({ color: 0xf1d59b, map: sandTex, roughness: 1, metalness: 0 });
+const groundMat = new THREE.MeshStandardMaterial({ color: 0xf1d59b, map: sandTex, roughness: 0.95, metalness: 0 });
 const groundGeo = new THREE.PlaneGeometry(tileSize, tileSize, 1, 1);
 
 function createTiles() {
@@ -105,7 +131,7 @@ function makeCar(){
   // body
   const body = new THREE.Mesh(
     new THREE.BoxGeometry(3.6, 1.0, 6.0),
-    new THREE.MeshStandardMaterial({ color: 0xcc3b3b, roughness: 0.7 })
+    new THREE.MeshStandardMaterial({ color: 0xcc3b3b, roughness: 0.4, metalness: 0.6 })
   );
   body.position.y = 1.2;
   body.castShadow = true; body.receiveShadow = true;
@@ -113,14 +139,14 @@ function makeCar(){
   // canopy
   const canopy = new THREE.Mesh(
     new THREE.CapsuleGeometry(1.2, 1.4, 6, 12),
-    new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.3, metalness: 0.4 })
+    new THREE.MeshStandardMaterial({ color: 0x333333, roughness: 0.05, metalness: 1 })
   );
   canopy.position.set(0, 1.8, -0.6);
   canopy.rotation.x = Math.PI * 0.03;
   canopy.castShadow = true; grp.add(canopy);
   // fins
   const finGeo = new THREE.BoxGeometry(0.2, 1.0, 2.0);
-  const finMat = new THREE.MeshStandardMaterial({ color: 0x861f1f, roughness: 0.9 });
+  const finMat = new THREE.MeshStandardMaterial({ color: 0x861f1f, roughness: 0.5, metalness: 0.3 });
   for (let s of [-1,1]){
     const fin = new THREE.Mesh(finGeo, finMat);
     fin.position.set(1.9*s, 1.4, 1.0);
