@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tiny 3D Desert Racer</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="game"></canvas>
+  <div class="hud">
+    <div class="panel">
+      <h1>🏜️ Tiny Desert Racer</h1>
+      <div class="stats">
+        <div>Speed</div><div id="speed">0</div>
+        <div>Time</div><div id="time">0.00</div>
+        <div>Gates</div><div id="gates">0 / 6</div>
+      </div>
+    </div>
+    <div class="topright">Press <kbd>R</kbd> to reset • <kbd>P</kbd> to pause • <kbd>Space</kbd> boost</div>
+    <div class="center" id="banner"></div>
+    <div class="bottom">Controls: <kbd>W</kbd> accelerate • <kbd>S</kbd> brake • <kbd>A</kbd>/<kbd>D</kbd> steer • Mobile: buttons below</div>
+    <div class="touch">
+      <button class="btn" id="left">⬅️</button>
+      <button class="btn" id="throttle">⏩</button>
+      <button class="btn" id="right">➡️</button>
+      <button class="btn" id="brake">⏹️</button>
+    </div>
+  </div>
+  <div class="flash" id="flash"></div>
+  <script type="module" src="main.js"></script>
+
+</body>
+</html>
