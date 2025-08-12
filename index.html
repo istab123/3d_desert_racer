@@ -28,7 +28,15 @@
     </div>
   </div>
   <div class="flash" id="flash"></div>
-  <script type="module" src="main.js"></script>
+  <script type="module">
+    import('./main.js').catch(err => {
+      console.error(err);
+      const banner = document.getElementById('banner');
+      if (banner) {
+        banner.textContent = 'Failed to load game assets. Please check your internet connection.';
+      }
+    });
+  </script>
 
 </body>
 </html>
