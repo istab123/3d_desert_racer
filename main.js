@@ -236,20 +236,28 @@ spawnChunk(400);
 // --- Input ---
 const input = { f:0, b:0, l:0, r:0, boost:0, paused:false };
 const keys = new Set();
-const onKey = (e, down) => {
+
+function onKey(e, down){
   if (e.repeat) return;
   const k = e.key.toLowerCase();
-  if (k === 'w' || k === 'arrowup') input.f = down?1: (keys.has('w')||keys.has('arrowup'))?1:0;
-  if (k === 's' || k === 'arrowdown') input.b = down?1: (keys.has('s')||keys.has('arrowdown'))?1:0;
-  if (k === 'a' || k === 'arrowleft') input.l = down?1: (keys.has('a')||keys.has('arrowleft'))?1:0;
-  if (k === 'd' || k === 'arrowright') input.r = down?1: (keys.has('d')||keys.has('arrowright'))?1:0;
-  if (k === ' ') input.boost = down?1:0;
-  if (!down) keys.delete(k); else keys.add(k);
-  if (k === 'p' && down){ input.paused = !input.paused; banner(input.paused? 'Paused' : ''); }
+
+  if (down) keys.add(k); else keys.delete(k);
+
+  const pressed = key => keys.has(key);
+  input.f = pressed('w') || pressed('arrowup') ? 1 : 0;
+  input.b = pressed('s') || pressed('arrowdown') ? 1 : 0;
+  input.l = pressed('a') || pressed('arrowleft') ? 1 : 0;
+  input.r = pressed('d') || pressed('arrowright') ? 1 : 0;
+  input.boost = pressed(' ') || pressed('space') ? 1 : 0;
+
+  if (k === 'p' && down){
+    input.paused = !input.paused; banner(input.paused ? 'Paused' : '');
+  }
   if (k === 'r' && down){ reset(); }
-};
-addEventListener('keydown', e=>onKey(e,true));
-addEventListener('keyup', e=>onKey(e,false));
+}
+
+addEventListener('keydown', e => onKey(e, true));
+addEventListener('keyup', e => onKey(e, false));
 
 // Mobile touch buttons
 const btn = id => document.getElementById(id);
