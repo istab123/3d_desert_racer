@@ -1,4 +1,5 @@
 import * as THREE from 'https://unpkg.com/three@0.157.0/build/three.module.js';
+import { Sky } from 'https://unpkg.com/three@0.157.0/examples/jsm/objects/Sky.js';
 
 // Renderer
 const renderer = new THREE.WebGLRenderer({
@@ -12,8 +13,10 @@ renderer.shadowMap.enabled = true;
 
 // Scene & Camera
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0xf6e6c1);
-scene.fog = new THREE.FogExp2(0xf6e6c1, 0.005);
+const sky = new Sky();
+sky.scale.setScalar(10000);
+scene.add(sky);
+scene.fog = new THREE.FogExp2(0xf6e6c1, 0.002);
 
 const camera = new THREE.PerspectiveCamera(60, innerWidth/innerHeight, 0.1, 2000);
 camera.position.set(0,5,-10);
@@ -23,9 +26,23 @@ scene.add(camera);
 const hemi = new THREE.HemisphereLight(0xfff5cf, 0x997a45, 0.8);
 scene.add(hemi);
 const sun = new THREE.DirectionalLight(0xffffff, 1);
-sun.position.set(20,40,10);
 sun.castShadow = true;
 scene.add(sun);
+
+const skyUniforms = sky.material.uniforms;
+skyUniforms['turbidity'].value = 10;
+skyUniforms['rayleigh'].value = 2;
+skyUniforms['mieCoefficient'].value = 0.005;
+skyUniforms['mieDirectionalG'].value = 0.8;
+const sunPos = new THREE.Vector3();
+function updateSun(){
+  const phi = THREE.MathUtils.degToRad(90 - 10);
+  const theta = THREE.MathUtils.degToRad(180);
+  sunPos.setFromSphericalCoords(1, phi, theta);
+  sky.material.uniforms['sunPosition'].value.copy(sunPos);
+  sun.position.copy(sunPos).multiplyScalar(1000);
+}
+updateSun();
 
 // Sand texture & ground
 function makeSandTexture(){
@@ -45,12 +62,37 @@ function makeSandTexture(){
   return tex;
 }
 
+function duneHeight(x,z){
+  return Math.sin(x*0.02) * 3 + Math.sin(z*0.018) * 3;
+}
+
 const groundGeo = new THREE.PlaneGeometry(2000, 2000, 100, 100);
 groundGeo.rotateX(-Math.PI/2);
+const pos = groundGeo.attributes.position;
+for(let i=0;i<pos.count;i++){
+  const x = pos.getX(i);
+  const z = pos.getZ(i);
+  pos.setY(i, duneHeight(x, z));
+}
+groundGeo.computeVertexNormals();
+
 const groundMat = new THREE.MeshStandardMaterial({color:0xf5d7a1,map:makeSandTexture()});
 const ground = new THREE.Mesh(groundGeo, groundMat);
 ground.receiveShadow = true;
 scene.add(ground);
+
+function addRock(x,z){
+  const radius = Math.random()*1 + 0.5;
+  const geo = new THREE.IcosahedronGeometry(radius,1);
+  const mat = new THREE.MeshStandardMaterial({color:0x888888, flatShading:true});
+  const rock = new THREE.Mesh(geo, mat);
+  rock.castShadow = true;
+  rock.position.set(x, duneHeight(x,z) + radius, z);
+  scene.add(rock);
+}
+for(let i=0;i<30;i++){
+  addRock((Math.random()-0.5)*500, (Math.random()-0.5)*500);
+}
 
 // Car
 const car = new THREE.Group();
